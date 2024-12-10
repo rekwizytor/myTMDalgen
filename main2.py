@@ -27,7 +27,7 @@ gen_random_pop(args.pop_size, args.struct_filename, args.size, args.n_atoms, arg
                args.calc, args.mag_moment, args.label, 'pop0')
 
 #przygotowanie kolejnych pokolen
-for i in range(args.n_generations):
+for i in range(args.n_generations-1):
     prep_gen(f'sorted_pop{i}.traj', args.pop_size, args.n_best, args.n_child, args.n_mut,
                     args.struct_filename, args.size, args.n_atoms, args.n_change, args.atom_symbol,
                     calc, args.mag_moment, args.label, f'pop{i+1}')
