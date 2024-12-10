@@ -37,6 +37,7 @@ try:
     relaxed_atoms.pbc = [True, True, False]
     relaxed_atoms.info['pot_energy'] = np.round(pot_energy, 4)
     io.write(f'relaxed_{args.label}.xyz', relaxed_atoms)
+    print(f'Udało się zrelaksować wygenerowaną strukturę.')
 except Exception as e:
         print(f'Nie udało się zrelaksować wygenerowanej struktury. Błąd: {e}')
 

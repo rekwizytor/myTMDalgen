@@ -4,6 +4,10 @@ from functions.calculator import get_calc
 
 parser = argparse.ArgumentParser(description='Program przygotowujący następne pokolenie na podstawie populacji z pliku .traj')
 parser.add_argument('pop_filename', type=str, help='Nazwa pliku z populacją')
+parser.add_argument('pop_size', type=int, help='Ilość osobników w populacji')
+parser.add_argument('n_best', type=int, help='Ilość najlepszych osobnikow z poprzedniego pokolenia, ktorzy trafia do nowego pokolenia')
+parser.add_argument('n_child', type=int, help='Ilość nowych osobników tworzonych poprzez krzyzowanie')
+parser.add_argument('n_mut', type=int, help='Ilość nowych osobników tworzonych poprzez mutację')
 parser.add_argument('struct_filename', type=str, help='Nazwa pliku ze strukturą dichalkogenka')
 parser.add_argument('size', type=str, help='Rozmiar struktur w populacji (np. 3x3)')
 parser.add_argument('n_atoms', type=int, help='Ilość atomów miedzy warstwami w strukturach w populacji')
@@ -16,5 +20,6 @@ args = parser.parse_args()
 
 calc = get_calc(args.label)
 
-prep_gen(args.pop_filename, args.struct_filename, args.size, args.n_atoms, args.n_change, args.atom_symbol,
+prep_gen(args.pop_filename, args.pop_size, args.n_best, args.n_child, args.n_mut,
+         args.struct_filename, args.size, args.n_atoms, args.n_change, args.atom_symbol,
          calc, args.mag_moment, args.label, args.new_pop_name)

@@ -3,6 +3,7 @@ from pathlib import Path
 import numpy as np
 from ase import io
 from ase.io import Trajectory
+from math import ceil
 from functions.sort_pop import sort_pop
 from functions.gen_rand_struct import gen_rand_struct
 from functions.mutation import mutation
@@ -10,12 +11,12 @@ from functions.crossover import crossover
 from functions.gen_energy_file import gen_energy_file
 
 
-def prep_gen(pop_filename, struct_filename, size, n_atoms, n_change, atom_symbol,
+def prep_gen(pop_filename, pop_size, n_best, n_child, n_mut,
+             struct_filename, size, n_atoms, n_change, atom_symbol,
              calc, mag_moment, label, new_pop_name):
 
     previous_pop = sort_pop(Trajectory(pop_filename, 'r'))
-    pop_size = len(previous_pop)
-    better_part = previous_pop[:5]
+    better_part = previous_pop[:ceil(pop_size/2)]
 
     folder_path = Path(f'{new_pop_name}')
     folder_path.mkdir(parents=True, exist_ok=True)
@@ -23,11 +24,12 @@ def prep_gen(pop_filename, struct_filename, size, n_atoms, n_change, atom_symbol
     os.chdir(folder_path)
 
     new_pop = Trajectory(f'{new_pop_name}.traj', 'w')
-    new_pop.write(better_part[0])
+    for i in range(n_best):
+        new_pop.write(better_part[i])
 
     child_counter = 0
     childes = []
-    while len(childes) < 2:
+    while len(childes) < n_child:
         child_counter += 1
         tmp_folder_path = Path(f'child{child_counter}')
         tmp_folder_path.mkdir(parents=True, exist_ok=True)
@@ -44,8 +46,13 @@ def prep_gen(pop_filename, struct_filename, size, n_atoms, n_change, atom_symbol
             relaxed_child.info['pot_energy'] = np.round(pot_energy, 4)
             childes.append(relaxed_child)
             io.write(f'relaxed_child{child_counter}.xyz', relaxed_child)
+            print(f'Udało sie zrelaksować potomka nr {child_counter}.')
+            with open(f'../log_{new_pop_name}.txt', 'a') as f:
+                f.write(f'Udało sie zrelaksować potomka nr {child_counter}.\n')
         except Exception as e:
             print(f'Nie udało sie zrelaksować potomka nr {child_counter}. Kod błędu: {e}')
+            with open(f'../log_{new_pop_name}.txt', 'a') as f:
+                f.write(f'Nie udało sie zrelaksować potomka nr {child_counter}. Kod błędu: {e}\n')
 
         os.chdir(original_directory / folder_path)
 
@@ -54,7 +61,7 @@ def prep_gen(pop_filename, struct_filename, size, n_atoms, n_change, atom_symbol
 
     mut_counter = 0
     mut_structures = []
-    while len(mut_structures) < 2:
+    while len(mut_structures) < n_mut:
         mut_counter += 1
         tmp_folder_path = Path(f'mut{mut_counter}')
         tmp_folder_path.mkdir(parents=True, exist_ok=True)
@@ -70,8 +77,13 @@ def prep_gen(pop_filename, struct_filename, size, n_atoms, n_change, atom_symbol
             relaxed_mut_struct.info['pot_energy'] = np.round(pot_energy, 4)
             mut_structures.append(relaxed_mut_struct)
             io.write(f'relaxed_mut_struct{mut_counter}.xyz', relaxed_mut_struct)
+            print(f'Udało sie zrelaksować zmutowaną strukturę nr {mut_counter}.')
+            with open(f'../log_{new_pop_name}.txt', 'a') as f:
+                f.write('Udało sie zrelaksować zmutowaną strukturę nr {mut_counter}.\n')
         except Exception as e:
-            print(f'Nie udało sie zrelaksować zmutowanej struktury nr {child_counter}. Kod błędu: {e}')
+            print(f'Nie udało sie zrelaksować zmutowanej struktury nr {mut_counter}. Kod błędu: {e}')
+            with open(f'../log_{new_pop_name}.txt', 'a') as f:
+                f.write(f'Nie udało sie zrelaksować zmutowanej struktury nr {mut_counter}. Kod błędu: {e}\n')
 
         os.chdir(original_directory / folder_path)
 
@@ -95,8 +107,13 @@ def prep_gen(pop_filename, struct_filename, size, n_atoms, n_change, atom_symbol
             relaxed_struct.info['pot_energy'] = np.round(pot_energy, 4)
             io.write(f'relaxed_cand{candidates_counter}.xyz', relaxed_struct)
             new_pop.write(relaxed_struct)
+            print(f'Udało sie zrelaksować kandydata {candidates_counter}.')
+            with open(f'../log_{new_pop_name}.txt', 'a') as f:
+                f.write(f'Udało sie zrelaksować kandydata {candidates_counter}.\n')
         except Exception as e:
             print(f'Nie udało sie zrelaksować kandydata {candidates_counter}. Kod błędu: {e}')
+            with open(f'../log_{new_pop_name}.txt', 'a') as f:
+                f.write(f'Nie udało sie zrelaksować kandydata {candidates_counter}. Kod błędu: {e}\n')
 
         os.chdir(original_directory / folder_path)
 
@@ -109,4 +126,6 @@ def prep_gen(pop_filename, struct_filename, size, n_atoms, n_change, atom_symbol
     for structure in tmp_pop:
         out_pop.write(structure)
 
-    print(f'Zakończono generowanie nowego pokolenia!')
+    print(f'Generowanie {new_pop_name} zakończone!')
+    with open(f'{folder_path}/log_{new_pop_name}.txt', 'a') as f:
+        f.write(f'Generowanie {new_pop_name} zakończone!\n')

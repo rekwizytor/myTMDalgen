@@ -45,7 +45,7 @@ for i, structure in enumerate(population):
         relaxed_traj.write(relaxed_structure)
         with open(f'../energy_{args.label}.txt', 'a') as file:
             file.write(f'{i}\t{pot_energy}\n')
-        print(f'Zrelaksowano kandydata nr. {i+1}')
+        print(f'Zrelaksowano strukturę nr. {i+1}')
     except Exception as e:
         print(f'Nie udało sie zrelaksować struktury {i+1}. Kod błędu: {e}')
 

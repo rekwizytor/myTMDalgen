@@ -1,11 +1,11 @@
 import argparse
+from functions.gen_random_pop import gen_random_pop
 from functions.prep_gen import prep_gen
 from functions.calculator import get_calc
 
 
 parser = argparse.ArgumentParser(description='Program ewolujący zadaną ilość pokoleń na podstawie początkowej populacji z pliku .traj')
 parser.add_argument('n_generations', type=int, help='Liczba pokoleń')
-parser.add_argument('pop_filename', type=str, help='Nazwa pliku z populacją')
 parser.add_argument('pop_size', type=int, help='Ilość osobników w populacji')
 parser.add_argument('n_best', type=int, help='Ilość najlepszych osobnikow z poprzedniego pokolenia, ktorzy trafia do nowego pokolenia')
 parser.add_argument('n_child', type=int, help='Ilość nowych osobników tworzonych poprzez krzyzowanie')
@@ -19,15 +19,15 @@ parser.add_argument('mag_moment', type=float, help='Początkowy moment magnetycz
 parser.add_argument('label', type=str, help='Etykieta nadawana plikom kalkulatora Siesta (np. MoS2)')
 args = parser.parse_args()
 
+#ustawienie kalkulatora wykorzystywanego do obliczen
 calc = get_calc(args.label)
 
-#przygotowanie pierwszego pokolenia na podstawie populacji początkowej wczytanej z podanego pliku
-prep_gen(args.pop_filename,  args.pop_size, args.n_best, args.n_child, args.n_mut,
-         args.struct_filename, args.size, args.n_atoms, args.n_change, args.atom_symbol,
-         calc, args.mag_moment, args.label, 'pop1')
+#wygenerowanie populacji poczatkowej
+gen_random_pop(args.pop_size, args.struct_filename, args.size, args.n_atoms, args.atom_symbol,
+               args.calc, args.mag_moment, args.label, 'pop0')
 
-#przygotowanie kolejnych pokolen na podstawie wygenerowanych populacji
-for i in range(args.n_generations-1):
-    prep_gen(f'sorted_pop{i+1}.traj', args.pop_size, args.n_best, args.n_child, args.n_mut,
-             args.struct_filename, args.size, args.n_atoms, args.n_change, args.atom_symbol,
-             calc, args.mag_moment, args.label, f'pop{i+2}')
+#przygotowanie kolejnych pokolen
+for i in range(args.n_generations):
+    prep_gen(f'sorted_pop{i}.traj', args.pop_size, args.n_best, args.n_child, args.n_mut,
+                    args.struct_filename, args.size, args.n_atoms, args.n_change, args.atom_symbol,
+                    calc, args.mag_moment, args.label, f'pop{i+1}')
